@@ -97,23 +97,42 @@ for i, lang in enumerate(sorted(langs)):
 
     print()
 
-np.savez(
-    os.path.join(output_dir, 'laserembeddings-test-data.npz'),
-    langs=np.asarray(sorted(langs)),
-    **{f'{lang}_sentences': np.asarray(texts[lang])
-       for lang in sorted(langs)},
-    **{
-        f'{lang}_embeddings': np.concatenate(vectors[lang])
-        for lang in sorted(langs)
-    })
+if laser2:
+    np.savez(
+        os.path.join(output_dir, 'laserembeddings2-test-data.npz'),
+        langs=np.asarray(sorted(langs)),
+        **{f'{lang}_sentences': np.asarray(texts[lang])
+        for lang in sorted(langs)},
+        **{
+            f'{lang}_embeddings': np.concatenate(vectors[lang])
+            for lang in sorted(langs)
+        })
+else:
+    np.savez(
+        os.path.join(output_dir, 'laserembeddings-test-data.npz'),
+        langs=np.asarray(sorted(langs)),
+        **{f'{lang}_sentences': np.asarray(texts[lang])
+        for lang in sorted(langs)},
+        **{
+            f'{lang}_embeddings': np.concatenate(vectors[lang])
+            for lang in sorted(langs)
+        })
 
 print('⏳   \033[1;34mCreating archive...\033[0;0m', end='')
 
-with tarfile.open(os.path.join(output_dir, 'laserembeddings-test-data.tar.gz'),
+if laser2:
+    with tarfile.open(os.path.join(output_dir, 'laserembeddings2-test-data.tar.gz'),
+                    'w:gz') as tar:
+        tar.add(os.path.join(output_dir, 'laserembeddings2-test-data.npz'),
+                'laserembeddings2-test-data.npz')
+        tar.add(os.path.join(output_dir, 'README.md'), 'README.md')
+        tar.add(os.path.join(output_dir, 'LICENSE'), 'LICENSE')
+else:
+    with tarfile.open(os.path.join(output_dir, 'laserembeddings-test-data.tar.gz'),
                   'w:gz') as tar:
-    tar.add(os.path.join(output_dir, 'laserembeddings-test-data.npz'),
-            'laserembeddings-test-data.npz')
-    tar.add(os.path.join(output_dir, 'README.md'), 'README.md')
-    tar.add(os.path.join(output_dir, 'LICENSE'), 'LICENSE')
+        tar.add(os.path.join(output_dir, 'laserembeddings-test-data.npz'),
+                'laserembeddings-test-data.npz')
+        tar.add(os.path.join(output_dir, 'README.md'), 'README.md')
+        tar.add(os.path.join(output_dir, 'LICENSE'), 'LICENSE')
 
 print('\r✅   \033[1;34mCreated archive    \033[0;0m')
