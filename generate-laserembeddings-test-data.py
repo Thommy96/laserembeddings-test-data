@@ -24,18 +24,24 @@ def remove_non_single_sentences(sentences):
     ]
 
 
-def compute_embeddings(sentences, lang):
+def compute_embeddings(sentences, lang, laser2=True):
     with TemporaryDirectory() as tmpdirname:
         sentences_tmp_file = os.path.join(tmpdirname, 'sentences.txt')
         embeddings_tmp_file = os.path.join(tmpdirname, 'embeddings.raw')
 
         with open(sentences_tmp_file, 'w', encoding='utf8') as f:
             f.write('\n'.join(sentences))
-
-        check_call([
-            os.path.join(LASER, 'tasks', 'embed', 'embed.sh'),
-            sentences_tmp_file, lang, embeddings_tmp_file
-        ])
+        
+        if laser2:
+            check_call([
+                os.path.join(LASER, 'tasks', 'embed', 'embed.sh'),
+                sentences_tmp_file, embeddings_tmp_file
+            ])
+        else:
+            check_call([
+                os.path.join(LASER, 'tasks', 'embed', 'embed.sh'),
+                sentences_tmp_file, lang, embeddings_tmp_file
+            ])
 
         return np.fromfile(embeddings_tmp_file, dtype=np.float32,
                            count=-1).reshape(-1, 1024)
@@ -48,6 +54,9 @@ def normalize_language_code(lang):
     except NonExistentLanguageError:
         return lang
 
+# set to False if specific laser model for given language should be used
+# laser2 model doesn't require to provide a language
+laser2 = True
 
 output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                           'test-data')
@@ -83,7 +92,7 @@ for i, lang in enumerate(sorted(langs)):
         f'\033[1;34m[{i+1}/{len(langs)}] Computing embeddings for lang: {lang}\033[0;0m'
     )
 
-    embeddings = compute_embeddings(texts[lang], lang)
+    embeddings = compute_embeddings(texts[lang], lang, laser2)
     vectors[lang].append(embeddings)
 
     print()
